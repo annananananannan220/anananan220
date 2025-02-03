@@ -9,11 +9,23 @@ local urls = {
 
 -- Function to load and execute a Lua file
 local function loadAndExecute(url)
-    local scriptContent = game:HttpGet(url)
-    loadstring(scriptContent)()
+    local success, scriptContent = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    if success then
+        local success, result = pcall(function()
+            loadstring(scriptContent)()
+        end)
+        if not success then
+            warn("Error executing script at " .. url .. ": " .. result)
+        end
+    else
+        warn("Error loading script from " .. url .. ": " .. scriptContent)
+    end
 end
 
--- Run all scripts concurrently using coroutines
+-- Run all scripts sequentially
 for _, url in ipairs(urls) do
-    coroutine.wrap(loadAndExecute)(url)
+    loadAndExecute(url)
 end
