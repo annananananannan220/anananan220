@@ -1,6 +1,6 @@
 -- List of Luas
 local urls = {
-    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/test"
+    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/gui"
 }
 
 -- Execute
