@@ -9,30 +9,12 @@ local urls = {
 
 -- Function to load and execute a Lua file
 local function loadAndExecute(url)
-    print("Loading: " .. url)  -- Debugging log to check script loading
-    local success, scriptContent = pcall(function()
-        return game:HttpGet(url)
-    end)
-
-    if success then
-        print("Successfully loaded: " .. url)  -- Debugging log
-        -- Execute the script with loadstring
-        local execSuccess, execResult = pcall(function()
-            loadstring(scriptContent)()  -- Run the Lua code
-        end)
-        
-        if execSuccess then
-            print("Successfully executed: " .. url)  -- Debugging log
-        else
-            warn("Error executing script at " .. url .. ": " .. execResult)
-        end
-    else
-        warn("Error loading script from " .. url .. ": " .. scriptContent)
-    end
+    local scriptContent = game:HttpGet(url)
+    loadstring(scriptContent)()  -- Execute the Lua script content
 end
 
--- Run all scripts sequentially
+-- Run all scripts sequentially with a 1.5-second delay
 for _, url in ipairs(urls) do
     loadAndExecute(url)
+    wait(1.5)  -- 1.5-second delay after each script execution
 end
-
