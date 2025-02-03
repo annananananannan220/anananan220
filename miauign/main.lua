@@ -1,10 +1,10 @@
--- List of URLs for your Lua files
+-- List of URLs for your Lua files in the correct order
 local urls = {
-    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/gui.lua",
     "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/wh.lua",
-    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/cs.lua",
+    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/cs.lua", 
     "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/set.lua",
-    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/otr.lua"
+    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/otr.lua",
+    "https://raw.githubusercontent.com/annananananannan220/anananan220/main/miauign/gui.lua"   
 }
 
 -- Function to load and execute a Lua file
@@ -25,7 +25,7 @@ local function loadAndExecute(url)
     end
 end
 
--- Run all scripts sequentially
+-- Run all scripts sequentially in the correct order
 for _, url in ipairs(urls) do
     loadAndExecute(url)
 end
