@@ -18,3 +18,6 @@ for _, url in ipairs(urls) do
     loadAndExecute(url)
     wait(1.5)  -- 1.5-second delay after each script execution
 end
+
+-- Wait for additional 1.5 seconds before showing the GUI
+wait(1.5)
