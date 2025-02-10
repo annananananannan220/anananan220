@@ -31,7 +31,7 @@ if not getgenv().StingrayLoaded then
             getgenv().Webhook = readfile("JJI_Webhook.txt")
         end
         if getgenv().Webhook:find("https://discord.com/api/webhooks") then
-            game:GetService("RunService"):Set3dRenderingEnabled(false)
+            game:GetService("RunService"):Set3dRenderingEnabled(true)
         end
     end)
 
