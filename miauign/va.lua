@@ -22,6 +22,38 @@ if not getgenv().ScriptLoaded then
     local ServerRemotes = RS:WaitForChild("Remotes"):WaitForChild("Server")
     local ClientRemotes = RS:WaitForChild("Remotes"):WaitForChild("Client")
 
+    -- UI --
+	    local Toggle = "ON"
+    task.spawn(function()
+        local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/annananananannan220/anananan220/refs/heads/main/miauign/cav"))()
+        local MainUI = UI.InitUI()
+        pcall(function()
+            if isfile("JJI_State.txt") then
+                Toggle = readfile("JJI_State.txt")
+            else
+                writefile("JJI_State.txt", "ON")
+            end
+        end)
+        if Toggle == "ON" then
+            UI.SetState(true)
+        else
+            UI.SetState(false)
+        end
+        UI.SetMain(function(State)
+            if State == 1 then
+                Toggle = "ON"
+            else
+                Toggle = "OFF"
+            end
+            writefile("JJI_State.txt", Toggle)
+        end)
+        if Toggle == "ON" then
+            local S, E = pcall(function()
+                queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/annananananannan220/anananan220/refs/heads/main/miauign/va.lua"))()')()
+            end)
+        end
+    end)
+
     -- Webhook
     pcall(function()
         if getgenv().Webhook then
