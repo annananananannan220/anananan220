@@ -556,7 +556,7 @@ if not getgenv().ScriptLoaded then
             task.wait()
             local embed = {
                 ["title"] = Boss .. "Grind Timer: [" .. tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds]",
-                ["description"] = "**Collected Items**" .. formattedString,
+                ["description"] = "**Collected Items**" .. table.concat(Items, " | "),
                 ["color"] = tonumber(0xffffff),
             }
             request({
