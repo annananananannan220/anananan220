@@ -4,8 +4,8 @@ repeat
     task.wait()
 until game:IsLoaded()
 
-if not getgenv().StingrayLoaded then
-    getgenv().StingrayLoaded = true
+if not getgenv().ScriptLoaded then
+    getgenv().ScriptLoaded = true
     print("Script Loaded")
     
     -- Init --
@@ -22,7 +22,7 @@ if not getgenv().StingrayLoaded then
     local ServerRemotes = RS:WaitForChild("Remotes"):WaitForChild("Server")
     local ClientRemotes = RS:WaitForChild("Remotes"):WaitForChild("Client")
 
-    -- webhook --
+    -- Webhook
     pcall(function()
         if getgenv().Webhook then
             writefile("JJI_Webhook.txt", getgenv().Webhook)
@@ -300,6 +300,20 @@ if not getgenv().StingrayLoaded then
         end)
     end
 
+    local function AnalyseInventory()
+        local MaterialAmount, Sorted = {}, {}
+        local AllFull = true
+        local Inventory = LocalPlayer.ReplicatedData.inventory
+        table.foreach(BossMaterials, function(_, v) MaterialAmount[v] = 0 end)
+        table.foreach(Inventory:GetChildren(), function(_, v) if table.find(BossMaterials, v.Name) then MaterialAmount[v.Name] = v.Value end end)
+        table.foreach(MaterialAmount, function(i, v) 
+            if v ~= 999 then AllFull = false end 
+            table.insert(Sorted, {i, v})
+        end)
+        if AllFull then return "Cursed Fragment" end
+        table.sort(Sorted, function(a, b) return a[2] > b[2] end)
+        return Sorted[#Sorted][1]
+    end
 
     -- Farm start --
     local ScriptLoading = tostring(math.floor((tick() - StartTime) * 10) / 10)
@@ -341,17 +355,55 @@ if not getgenv().StingrayLoaded then
     -- Update curse market data and inventory
     task.spawn(function()
         local S, E = pcall(function()
-            local T = {}
-            for _, v in pairs(RS.CurseMarket:GetChildren()) do
-                local Values = {}
-                for v in string.gmatch(v.Value, "([^|]+)") do
-                    table.insert(Values, v)
+            local Inventory, SpecialGrades, Message, Empty = LocalPlayer.ReplicatedData.inventory, {}, "", true
+            local Legendary = {"Demon Finger", "Demon Blob", "Cursed Tentacle", "Cursed Fragment", "Volcanic Ash", "Transfigured Human", "Heavenly Chains"}
+            for _, v in Inventory:GetChildren() do
+                local Item = v.Name
+                if Item:find("|") and not Item:find("Title") then
+                    Item = Item:match("^(.-)|")
+                    if SpecialGrades[Item] then
+                        SpecialGrades[Item] = SpecialGrades[Item] + 1
+                    else
+                        SpecialGrades[Item] = 1
+                    end
+                    Empty = false
+                elseif table.find(Legendary, Item) then
+                    SpecialGrades[Item] = v.Value
+                    Empty = false
                 end
-                local TradeMessage = Values[3] .. "x " .. Values[1] .. " -> " .. Values[4] .. "x " .. Values[2]
-                table.insert(T, TradeMessage)
             end
+            if Empty then SpecialGrades = {Drops = 0} end
+            local Data = game:GetService("HttpService"):JSONEncode({
+                Key = "{KEY}",
+                Username = LocalPlayer.Name,
+                Inventory = SpecialGrades
+            })
         end)
+
+        if SetBoss ~= "X" then
+            pcall(function()
+                repeat task.wait() until Overwritten
+                task.wait(0.5)
+                writefile("JJI_LastBoss.txt", SetBoss)
+            end)
+            if Boss ~= SetBoss then
+                while task.wait(10) do
+                    TP:Teleport(10450270085)
+                end
+            end
+        end
+
+        local S, E = pcall(function()
+            local Data = game:GetService("HttpService"):JSONEncode({
+                Key = "{KEY}",
+                Username = LocalPlayer.Name,
+                ["Boss"] = Boss
+            })
+            print(Data)
+        end)
+        
     end)
+
     -- Value spoofing --
     ClientRemotes:WaitForChild("GetFocus").OnClientInvoke = function() return 3 end
     ClientRemotes:WaitForChild("GetDomainMeter").OnClientInvoke = function() return 100 end
@@ -470,6 +522,75 @@ if not getgenv().StingrayLoaded then
         task.wait()
     until not (Drops:FindFirstChild("Chest") or LootUI.Enabled)
 
+    -- Send webhook message --
+    local S, E = pcall(function()
+        if getgenv().Webhook then
+		
+            local Executor = (identifyexecutor() or "None Found")
+			
+            local Content = ""
+			
+            if HasGoodDrops and DiscordPing ~= "None Found" then
+                Content = Content .. DiscordPing
+            end
+			
+            Content = Content .. "\n-# [Debug Data] " .. "Executor: " .. Executor .. " | Script Loading Time: " ..
+                          tostring(ScriptLoading) .. " | Luck Boosts: (" .. tostring(table.concat(LuckBoosts, ", ")) ..
+                          ") | Chests Collected: " .. tostring(ChestsCollected) .. 
+                          " | Send a copy of this data to Manta if there's any issues"
+            print("Sending webhook")
+            task.wait()
+            local embed = {
+                ["title"] = LocalPlayer.Name .. " has defeated " .. Boss .. " in " ..
+                    tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds",
+                ['description'] = "Collected Items: " .. table.concat(Items, " | "),
+                ["color"] = tonumber(000000)
+            }
+            request({
+                Url = getgenv().Webhook,
+                Headers = {
+                    ['Content-Type'] = 'application/json'
+                },
+                Body = game:GetService("HttpService"):JSONEncode({
+                    ['embeds'] = {embed},
+                    ['content'] = Content,
+                    ['avatar_url'] = "https://cdn.discordapp.com/attachments/1089257712900120576/1105570269055160422/archivector200300015.png"
+                }),
+                Method = "POST"
+            })
+            task.wait()
+            --{CUSTOMHOOK}--
+            print("Webhook sent!")
+        end  
+    end)
+    pcall(function()
+        local Response = ServerRemotes:WaitForChild("Dialogue"):WaitForChild("GetResponse"):InvokeServer("Clan Head Jujutsu High", "Start")
+        if not string.find(Response, "Don't waste") then
+            ServerRemotes:WaitForChild("Dialogue"):WaitForChild("GetResponse"):InvokeServer("Clan Head Jujutsu High", "Promote")
+        end
+    end)
+
+    if (true and {OVERNIGHT}) then
+        local CurrentMaterials = LocalPlayer.ReplicatedData.inventory:FindFirstChild(BossDrops[Boss])
+        if CurrentMaterials then
+            if CurrentMaterials.Value == 999 then
+                local MaterialToFarm = AnalyseInventory()
+                for i, v in BossDrops do
+                    if v == MaterialToFarm then
+                        local S, E = pcall(function()
+                            writefile("JJI_LastBoss.txt", i)
+                            print(i)
+                            while task.wait(10) do
+                                TP:Teleport(10450270085)
+                            end
+                        end)
+                        if not S then print(E) end
+                    end
+                end
+            end
+        end
+    end
+
     -- Click replay --
     task.wait()
     if Toggle == "ON" then
@@ -479,38 +600,3 @@ if not getgenv().StingrayLoaded then
         end
     end
 end
-
-    -- Send Webhook --
-    local S, E = pcall(function()
-        if getgenv().Webhook then   
-
-            local Executor = (identifyexecutor() or "Unknown Executor")
-            local Content = ""
-            if HasGoodDrops and DiscordPing ~= "None" then
-                Content = Content .. DiscordPing
-            end
-
-            Content = Content .. "\n-# [Debug] " .. "Executor used: " .. Executor .. " | Loading Time: " ..
-            tostring(ScriptLoading) .. ("Chest: ") .. tostring(ChestsCollected)
-            print("Sending")
-            task.wait()
-            local embed = {
-                ["title"] = Boss .. "Grind Timer: [" .. tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds]",
-                ["description"] = "**Collected Items**" .. table.concat(Items, " | "),
-                ["color"] = tonumber(000000)
-                }
-                request({
-                    Url = getgenv().Webhook,
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json"
-                    },
-                    Body = game:GetService("HttpService"):JSONEncode({
-                        ['embeds'] = {embed},
-                        ['content'] = Content
-                    })
-                })
-                task.wait()
-                print("Sent")
-            end
-        end)
