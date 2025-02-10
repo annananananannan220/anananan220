@@ -534,17 +534,14 @@ if not getgenv().ScriptLoaded then
                 Content = Content .. DiscordPing
             end
 			
-            Content = Content .. "\n-# [Debug Data] " .. "Executor: " .. Executor .. " | Script Loading Time: " ..
-                          tostring(ScriptLoading) .. " | Luck Boosts: (" .. tostring(table.concat(LuckBoosts, ", ")) ..
-                          ") | Chests Collected: " .. tostring(ChestsCollected) .. 
-                          " | Send a copy of this data to Manta if there's any issues"
+            Content = Content .. "\n-# [Debug] " .. "Executor used: " .. Executor .. " | Loading Time: " ..
+                            tostring(getgenv().ScriptLoading) .. "Chest: " .. tostring(getgenv().ChestsCollected)
             print("Sending webhook")
             task.wait()
             local embed = {
-                ["title"] = LocalPlayer.Name .. " has defeated " .. Boss .. " in " ..
-                    tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds",
-                ['description'] = "Collected Items: " .. table.concat(Items, " | "),
-                ["color"] = tonumber(000000)
+                ["title"] = getgenv().Boss .. "Grind Timer: [" .. tostring(math.floor((tick() - getgenv().StartTime) * 10) / 10) .. " seconds]",
+                ["description"] = "**Collected Items**" .. table.concat(getgenv().Items, " | "),
+                ["color"] = tonumber(0xffffff),
             }
             request({
                 Url = getgenv().Webhook,
