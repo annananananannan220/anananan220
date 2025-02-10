@@ -495,6 +495,22 @@ if not getgenv().ScriptLoaded then
                     end
                     table.insert(Items, Item[2])
                 end
+
+                local ItemCounts = {}
+                for _, item in pairs(Items) do
+                    if ItemCounts[item] then
+                        ItemCounts[item] = ItemCounts[item] + 1
+                    else
+                        ItemCounts[item] = 1
+                    end
+                end
+
+                local formattedItems = {}
+                for item, count in pairs(ItemCounts) do
+                    table.insert(formattedItems, "(" .. count .. "x)" .. item)
+                end
+
+                local formattedString = table.concat(formattedItems, "\n")
             end
             return {}
         end
@@ -525,24 +541,9 @@ if not getgenv().ScriptLoaded then
     -- Send webhook message --
     local S, E = pcall(function()
         if getgenv().Webhook then
-            
-            local ItemCounts = {}
-            for _, item in pairs(Items) do
-                if ItemCounts[item] then
-                    ItemCounts = ItemCounts + 1
-                else
-                    ItemCounts = 1
-                end
-            end
-
-            local formattedItems = {}
-            for item, count in pairs(ItemCounts) do
-                table.insert(formattedItems, "(" .. count .. "x) ".. item)
-            end
-
-            local formattedItemsString = table.concat(formattedItems, "\n")
-
+		
             local Executor = (identifyexecutor() or "None Found")
+			
             local Content = ""
 			
             if HasGoodDrops and DiscordPing ~= "None Found" then
@@ -555,7 +556,7 @@ if not getgenv().ScriptLoaded then
             task.wait()
             local embed = {
                 ["title"] = Boss .. "Grind Timer: [" .. tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds]",
-                ["description"] = "**Collected Items**" .. formattedItemsString,
+                ["description"] = "**Collected Items**" .. formattedString,
                 ["color"] = tonumber(0xffffff),
             }
             request({
