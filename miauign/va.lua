@@ -535,12 +535,12 @@ if not getgenv().ScriptLoaded then
             end
 			
             Content = Content .. "\n-# [Debug] " .. "Executor used: " .. Executor .. " | Loading Time: " ..
-                            tostring(ScriptLoading) .. "Chest: " .. tostring(ChestsCollected)
+                            tostring(ScriptLoading) .. " | Chest: " .. tostring(ChestsCollected)
             print("Sending webhook")
             task.wait()
             local embed = {
-                ["title"] = Boss .. "Grind Timer: [" .. tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds]",
-                ["description"] = "**Collected Items**" .. table.concat(Items, " | "),
+                ["title"] = " | " .. Boss .. " | Grind Timer: [" .. tostring(math.floor((tick() - StartTime) * 10) / 10) .. " seconds]",
+                ["description"] = "**Collected Items**" .. "\n" .. table.concat(Items, " | "),
                 ["color"] = tonumber(0xffffff),
             }
             request({
