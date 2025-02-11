@@ -1,4 +1,3 @@
-Response Body:
 repeat
     task.wait()
 until game:IsLoaded()
